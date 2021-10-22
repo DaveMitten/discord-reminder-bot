@@ -7,7 +7,12 @@ const log = require('debug')('reminder-bot');
 const discord = require('discord.js');
 const Scheduler = require('./scheduler');
 
-const auth = require('./auth.json'); //you need to make this file yourself!
+//Initialize Discord Bot
+let bot = new discord.Client();
+
+//Initialize scheduler
+let scheduler = new Scheduler(bot);
+// const auth = require('./auth.json'); //you need to make this file yourself!
 
 const helpmsg =
     "Hi there, I'm reminder bot!\n" +
@@ -27,16 +32,10 @@ const helpmsg =
  * @param err the error message to log
  */
 async function onError(channel, err) {
-
     log(err);
     await channel.send("Looks like even I forget things, like how to do what you just asked. Please ask me again later.");
 }
 
-//Initialize Discord Bot
-let bot = new discord.Client();
-
-//Initialize scheduler
-let scheduler = new Scheduler(bot);
 
 //log when the bot is ready
 bot.on('ready', (evt) => {
@@ -104,4 +103,4 @@ bot.on('message', async (message) => {
 });
 
 //start the bot by making it log in to discord.
-await bot.login(auth.token);
+await bot.login(process.env.token);

@@ -8,7 +8,7 @@ const Agenda = require('agenda');
 const StringBuilder = require('string-builder');
 const parser = require('./parser');
 
-const auth = require('./auth.json'); //you need to make this file yourself!
+// const auth = require('./auth.json'); //you need to make this file yourself!
 
 const genericParserErrorMessage = "Sorry, I didn't understand that."
 const genericSchedulerErrorMessage = "Sorry, I couldn't do that at this time. Please try again later."
@@ -306,7 +306,7 @@ function Scheduler(bot) {
 
         const user = await bot.fetchUser(userId);
 
-        if (user == undefined) {
+        if (user === undefined) {
 
             log("user not found: " + userId)
             return;
@@ -327,7 +327,7 @@ function Scheduler(bot) {
 
     //create agenda instance.
     //it will ping the DB every minute but jobs are held in memory as well, so reminders will run on time.
-    const agenda = new Agenda({ db: { address: auth.mongourl, collection: 'agenda' } }).processEvery('one minute');
+    const agenda = new Agenda({ db: { address: process.env.mongourl, collection: 'agenda' } }).processEvery('one minute');
 
     //make sure we only try to use agenda when it's ready
     agenda.on('ready', async function () {

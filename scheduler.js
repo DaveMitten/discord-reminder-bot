@@ -5,6 +5,8 @@ const Agenda = require("agenda")
 const moment = require("moment")
 const StringBuilder = require("string-builder")
 const parser = require("./parser");
+const {database} = require("agenda/dist/agenda/database");
+const {MongoClientOptions} = require("mongodb");
 
 // const auth = require('./auth.json'); //you need to make this file yourself!
 
@@ -18,8 +20,7 @@ const dateFormatString = "dddd, MMMM Do, YYYY [at] hh:mm:ss A"
  * Creates a scheduler
  * @param {Object} bot the discord.js bot instance we are using to communicate with discord
  */
-async function Scheduler(bot) {
-    console.log({bot})
+const Scheduler = (bot) => {
     /**
      * Use this function to get the id of the most recent reminder for a user
      *
@@ -176,7 +177,7 @@ async function Scheduler(bot) {
                 return;
             } else {
 
-                var sb = new StringBuilder();
+                let sb = new StringBuilder();
                 sb.appendLine(`OK **<@${userId}>**, I have found the following upcoming reminders for you:`)
 
                 //sort upcoming jobs so the soonest to run is first, latest to run is last.
@@ -263,7 +264,6 @@ async function Scheduler(bot) {
             }
         }).catch(e => {
             console.warn({"error, schedulaer, clear all reminders": e})
-            warn({"error, schedulaer, clear all reminders": e})
         })
     }
 
@@ -274,6 +274,7 @@ async function Scheduler(bot) {
      * @param channel the discord channel this request is coming from
      */
     this.clearActiveReminders = async function (userId, channel) {
+        agenda.cancel({name: 'hello'}, promiseCallback(resolve, reject));
 
         await agenda.cancel({
             name: reminderJobName,
@@ -303,51 +304,46 @@ async function Scheduler(bot) {
     const sendReminder = async function (userId, message) {
 
         const user = await bot.fetchUser(userId);
-
         if (user === undefined) {
-
             console.log("user not found: " + userId)
             return;
         }
 
         const channel = await user.createDM();
-
         if (channel === undefined) {
-
             console.log("dm channel not found for user " + userId)
             return;
         }
 
         await channel.send(`Hey **<@${userId}>**, remember **${message}**`);
-
         console.log("reminder sent to user " + userId);
     }
 
     //create agenda instance.
     //it will ping the DB every minute but jobs are held in memory as well, so reminders will run on time.
-    const agenda = new Agenda({
+    const agendaConfig = {
         db: {
             address: process.env.mongourl,
-            options: {useNewUrlParser: true, useUnifiedTopology: true}
+            // options: {useNewUrlParser: true, useUnifiedTopology: true}
         }
-    }).processEvery('one minute');
+    }
+    const agenda = new Agenda.Agenda(agendaConfig).processEvery('one minute')
 
 //make sure we only try to use agenda when it's ready
-    (await agenda._ready)('ready', async function () {
-
+//     agenda.on(() => {
+    agenda.start().then(() => {
         //define our only job, the 'send reminder' job.
         agenda.define('send reminder', async (job, done) => {
-
             const data = job.attrs.data;
             await sendReminder(data.userId, data.reminder);
-
             //this is an async func, call done to mark it as complete.
             done();
         });
-
         //start the scheduler.
-        await this.start();
-    });
+        // await agenda.start();
+    }).catch(e => {
+        console.warn({"agenda is not ready": e})
+    })
 }
 
 //always assign an already defined function to exports or you will get a singleton!

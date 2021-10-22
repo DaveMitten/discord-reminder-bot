@@ -11,15 +11,15 @@ require('dotenv').config(); //initialize dotenv
 // const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
 
-//Initialize Discord Bot
-let bot = new Client();
+//Initialize Discord client
+let client = new Client();
 
 //Initialize scheduler
-let scheduler = Scheduler(bot);
+let scheduler = Scheduler(client);
 // const auth = require('./auth.json'); //you need to make this file yourself!
 
 const helpmsg =
-    "Hi there, I'm reminder bot!\n" +
+    "Hi there, I'm reminder client!\n" +
     "You can see this message again by typing **!help**\n" +
     "You can set a reminder for yourself by typing **!remindme [about a thing] [at a time in the future]**\n" +
     "You can snooze the most recent reminder you received by typing **!snooze [for a time / until a time in the future]**\n" +
@@ -36,86 +36,133 @@ const helpmsg =
  * @param err the error message to log
  */
 async function onError(channel, err) {
-    log(err);
+    console.log({"error on error": err});
     await channel.send("Looks like even I forget things, like how to do what you just asked. Please ask me again later.");
 }
 
+//start the client by making it log in to discord.
+client.login(process.env.token).then(i => {
+    console.log({"loggedIn": true})
+}).catch(e => {
+    console.warn({"login": e})
+});
 
-//log when the bot is ready
-bot.on('ready', async (evt) => {
+//log when the client is ready
+client.on('ready', async (evt) => {
     try {
-        await evt.channel.send("connected");
+        await evt?.channel.send("connected");
+        console.log({"evt": evt})
+
     } catch (e) {
         console.warn({"error from connected ": e})
 
     }
     console.log('connected');
     console.log('logged in as: ');
-    console.log(`${bot.user.username} - (${bot.user.id})`);
+    console.log(`${client.user.username} - (${client.user.id})`);
 });
+
 const prefix = "!"
 
-// Decide what to do when the bot get a message. NOTE: discord supports markdown syntax.
+// Decide what to do when the client get a message. NOTE: discord supports markdown syntax.
 
-bot.on('messageCreate', async (message) => {
+client.on('messageCreate', async (message) => {
+    console.log({message})
+    if (message) {
+        try {
 
-    try {
+            // the client needs to know if it will execute a command
+            // It will listen for messages that will start with `!`
+            if (message?.content.startsWith(prefix)) {
 
-        // the bot needs to know if it will execute a command
-        // It will listen for messages that will start with `!`
-        if (!message.content.startsWith(prefix)) {
+                console.log('Received a command!')
 
-            console.log('Received a command!')
+                let messageContent = message?.content.substring(1);
+                let command = messageContent.split(' ')[0];
+                let parameters = messageContent.substring(messageContent.indexOf(' ') + 1);
 
-            let messageContent = message.content.substring(1);
-            let command = messageContent.split(' ')[0];
-            let parameters = messageContent.substring(messageContent.indexOf(' ') + 1);
+                switch (command) {
 
-            switch (command) {
+                    // handle commands
+                    case 'help':
+                        try {
+                            await message?.channel.send(helpmsg);
+                            console.log("help command executed");
+                        } catch (e) {
+                            console.warn({error: e + `  scheduale error ${command}`})
+                        }
 
-                // handle commands
-                case 'help':
-                    await message.channel.send(helpmsg);
-                    console.log("help command executed");
-                    break;
+                        break;
 
-                case 'remindme':
-                    await scheduler.setReminder(message.author.id, message.channel, parameters);
-                    break;
+                    case 'remindme':
+                        try {
+                            await scheduler.setReminder(message?.author.id, message?.channel, parameters);
 
-                case 'snooze':
-                    await scheduler.snoozeReminder(message.author.id, message.channel, parameters);
-                    break;
+                        } catch (e) {
+                            console.warn({error: e + `  scheduale error ${command}`})
+                        }
+                        break;
 
-                case 'snoozeall':
-                    await scheduler.snoozeReminders(message.author.id, message.channel, parameters);
-                    break;
+                    case 'snooze':
+                        try {
+                            await scheduler.snoozeReminder(message?.author.id, message?.channel, parameters);
 
-                case 'list':
-                    await scheduler.listReminders(message.author.id, message.channel);
-                    break;
+                        } catch (e) {
+                            console.warn({error: e + `  scheduale error ${command}`})
+                        }
+                        break;
 
-                case 'clear':
-                    await scheduler.clearActiveReminder(message.author.id, message.channel);
-                    break;
+                    case 'snoozeall':
+                        try {
+                            await scheduler.snoozeReminders(message?.author.id, message?.channel, parameters);
 
-                case 'clearall':
-                    await scheduler.clearActiveReminders(message.author.id, message.channel);
-                    break;
+                        } catch (e) {
+                            console.warn({error: e + `  scheduale error ${command}`})
+                        }
+                        break;
 
-                case 'forgetme':
-                    await scheduler.clearAllReminders(message.author.id, message.channel);
-                    break;
+                    case 'list':
+                        try {
+                            await scheduler.listReminders(message?.author.id, message?.channel);
+
+                        } catch (e) {
+                            console.warn({error: e + `  scheduale error ${command}`})
+                        }
+                        break;
+
+                    case 'clear':
+                        try {
+                            await scheduler.clearActiveReminder(message?.author.id, message?.channel);
+
+                        } catch (e) {
+                            console.warn({error: e + `  scheduale error ${command}`})
+                        }
+                        break;
+
+                    case 'clearall':
+                        try {
+                            await scheduler.clearActiveReminders(message?.author.id, message?.channel);
+
+                        } catch (e) {
+                            console.warn({error: e + `  scheduale error ${command}`})
+                        }
+                        break;
+
+                    case 'forgetme':
+                        try {
+                            await scheduler.clearAllReminders(message?.author.id, message?.channel);
+
+                        } catch (e) {
+                            console.warn({error: e + `  scheduale error ${command}`})
+                        }
+                        break;
+                }
             }
+        } catch (err) {
+            await onError(message?.channel, err);
         }
-    } catch (err) {
-        await onError(message.channel, err);
+    } else {
+        return console.warn({"no message": message})
     }
 });
 
-//start the bot by making it log in to discord.
-bot.login(process.env.token).then(i => {
-    console.log({"loggedIn": true})
-}).catch(e => {
-    console.warn({"login": e})
-});

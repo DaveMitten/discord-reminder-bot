@@ -5,6 +5,7 @@
   "main": "reminder-bot.js",
   "scripts": {
     "start": "reminder-bot.js",
+    "myScript": "node -e 'require(\"./index\").someFunction()'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Edwin Jones",

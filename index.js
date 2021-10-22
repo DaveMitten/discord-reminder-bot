@@ -1,18 +1,16 @@
-//Written by Edwin Jones - http://edwinjones.me.uk
+ // Written by Edwin Jones - http://edwinjones.me.uk
 
 'use strict';
 
-//dependencies
-const {Client} = require('discord.js');
-const Scheduler = require('./scheduler');
-require('dotenv').config(); //initialize dotenv
-
-
-// const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
-
-
+ // dependencies
+ const Scheduler = require('./scheduler.js')
+const Discord = require('discord.js');
+const Client = Discord.Client
+const Intents = Discord.Intents
+require("dotenv").config()
+const clientOptions = { intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] }
 //Initialize Discord client
-let client = new Client();
+const client = new Client();
 
 //Initialize scheduler
 let scheduler = Scheduler(client);
@@ -42,7 +40,6 @@ async function onError(channel, err) {
 
 
 
-
 //start the client by making it log in to discord.
 client.login(process.env.token).then(i => {
     console.log({"loggedIn": true, "scheduler": scheduler})
@@ -50,122 +47,126 @@ client.login(process.env.token).then(i => {
     console.warn({"login": e})
 });
 
+ client.on('message', msg => {
+     if (msg.content === 'ping') {
+         msg.reply('pong');
+     }
+ });
+
 client.on('ready', async (evt) => {
     try {
         await evt?.channel.send("connected");
-        console.log({"evt": evt})
-
     } catch (e) {
         console.warn({"error from connected ": e})
-
     }
     console.log('connected');
     console.log('logged in as: ');
     console.log(`${client.user.username} - (${client.user.id})`);
 });
 
-client.on('messageCreate', message => {
-    if (message.content === 'ping') {
-        message.channel.send('pong');
-    }
-});//log when the client is ready
+
+// client.on('message', async message => {
+//     if (message.content === 'ping') {
+//         await message.channel.send('pong');
+//     }
+// });
+//log when the client is ready
 
 const prefix = "!"
 
 // Decide what to do when the client get a message. NOTE: discord supports markdown syntax.
 
-// client.on('messageCreate', async (message) => {
-//     console.log({message})
-//     if (message) {
-//         try {
-//
-//             // the client needs to know if it will execute a command
-//             // It will listen for messages that will start with `!`
-//             if (message?.content.startsWith(prefix)) {
-//
-//                 console.log('Received a command!')
-//
-//                 let messageContent = message?.content.substring(1);
-//                 let command = messageContent.split(' ')[0];
-//                 let parameters = messageContent.substring(messageContent.indexOf(' ') + 1);
-//
-//                 switch (command) {
-//
-//                     // handle commands
-//                     case 'help':
-//                         try {
-//                             await message?.channel.send(helpmsg);
-//                             console.log("help command executed");
-//                         } catch (e) {
-//                             console.warn({error: e + `  scheduale error ${command}`})
-//                         }
-//
-//                         break;
-//
-//                     case 'remindme':
-//                         try {
-//                             await scheduler.setReminder(message?.author.id, message?.channel, parameters);
-//
-//                         } catch (e) {
-//                             console.warn({error: e + `  scheduale error ${command}`})
-//                         }
-//                         break;
-//
-//                     case 'snooze':
-//                         try {
-//                             await scheduler.snoozeReminder(message?.author.id, message?.channel, parameters);
-//
-//                         } catch (e) {
-//                             console.warn({error: e + `  scheduale error ${command}`})
-//                         }
-//                         break;
-//
-//                     case 'snoozeall':
-//                         try {
-//                             await scheduler.snoozeReminders(message?.author.id, message?.channel, parameters);
-//
-//                         } catch (e) {
-//                             console.warn({error: e + `  scheduale error ${command}`})
-//                         }
-//                         break;
-//
-//                     case 'list':
-//                         try {
-//                             await scheduler.listReminders(message?.author.id, message?.channel);
-//
-//                         } catch (e) {
-//                             console.warn({error: e + `  scheduale error ${command}`})
-//                         }
-//                         break;
-//
-//                     case 'clear':
-//                             await scheduler.clearActiveReminder(message?.author.id, message?.channel);
-//                         break;
-//
-//                     case 'clearall':
-//                         try {
-//                             await scheduler.clearActiveReminders(message?.author.id, message?.channel);
-//
-//                         } catch (e) {
-//                             console.warn({error: e + `  scheduale error ${command}`})
-//                         }
-//                         break;
-//
-//                     case 'forgetme':
-//                         try {
-//                             await scheduler.clearAllReminders(message?.author.id, message?.channel);
-//
-//                         } catch (e) {
-//                             console.warn({error: e + `  scheduale error ${command}`})
-//                         }
-//                         break;
-//                 }
-//             }
-//         } catch (err) {
-//             await onError(message?.channel, err);
-//         }
-//     } else {
-//         return console.warn({"no message": message})
-//     }
-// });
+client.on('message', async (message) => {
+    console.log(message.content)
+    if (message) {
+        try {
+            // the client needs to know if it will execute a command
+            // It will listen for messages that will start with `!`
+            if (message.content.startsWith(prefix)) {
+
+                console.log('Received a command!')
+
+                let messageContent = message?.content.substring(1);
+                let command = messageContent.split(' ')[0];
+                let parameters = messageContent.substring(messageContent.indexOf(' ') + 1);
+
+                switch (command) {
+
+                    // handle commands
+                    case 'help':
+                        try {
+                            await message?.channel.send(helpmsg);
+                            console.log("help command executed");
+                        } catch (e) {
+                            console.warn({error: e + `  scheduale error ${command}`})
+                        }
+
+                        break;
+
+                    case 'remindme':
+                        try {
+                            await scheduler.setReminder(message?.author.id, message?.channel, parameters);
+
+                        } catch (e) {
+                            console.warn({error: e + `  scheduale error ${command}`})
+                        }
+                        break;
+
+                    case 'snooze':
+                        try {
+                            await scheduler.snoozeReminder(message?.author.id, message?.channel, parameters);
+
+                        } catch (e) {
+                            console.warn({error: e + `  scheduale error ${command}`})
+                        }
+                        break;
+
+                    case 'snoozeall':
+                        try {
+                            await scheduler.snoozeReminders(message?.author.id, message?.channel, parameters);
+
+                        } catch (e) {
+                            console.warn({error: e + `  scheduale error ${command}`})
+                        }
+                        break;
+
+                    case 'list':
+                        try {
+                            await scheduler.listReminders(message?.author.id, message?.channel);
+
+                        } catch (e) {
+                            console.warn({error: e + `  scheduale error ${command}`})
+                        }
+                        break;
+
+                    case 'clear':
+                            await scheduler.clearActiveReminder(message?.author.id, message?.channel);
+                        break;
+
+                    case 'clearall':
+                        try {
+                            await scheduler.clearActiveReminders(message?.author.id, message?.channel);
+
+                        } catch (e) {
+                            console.warn({error: e + `  scheduale error ${command}`})
+                        }
+                        break;
+
+                    case 'forgetme':
+                        try {
+                            await scheduler.clearAllReminders(message?.author.id, message?.channel);
+
+                        } catch (e) {
+                            console.warn({error: e + `  scheduale error ${command}`})
+                        }
+                        break;
+                }
+            }
+        } catch (err) {
+            await onError(message?.channel, err);
+        }
+    } else {
+        return console.warn({"no message": message})
+    }
+});
 

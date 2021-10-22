@@ -4,8 +4,8 @@
   "description": "a reminder bot for discord",
   "main": "reminder-bot.js",
   "scripts": {
-    "start": "reminder-bot.js",
-    "myScript": "node -e 'require(\"./index\").someFunction()'",
+    "start": "node index.js",
+    "lint": "eslint . --ext .js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Edwin Jones",
@@ -14,12 +14,14 @@
     "agenda": "^4.2.1",
     "chrono-node": "^2.2.4",
     "debug": "^3.1.0",
-    "discord.js": "^11.3.2",
+    "discord.js": "v12",
+    "global": "^4.4.0",
     "moment": "^2.29.1",
     "string-builder": "^0.1.4"
   },
   "devDependencies": {
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "eslint": "^8.0.1"
   },
   "repository": {
     "type": "git",

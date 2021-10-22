@@ -5,6 +5,9 @@ const Agenda = require("agenda")
 const moment = require("moment")
 const StringBuilder = require("string-builder")
 const parser = require("./parser");
+const Discord = require('discord.js');
+const Client = Discord.Client
+const Intents = Discord.Intents
 const {database} = require("agenda/dist/agenda/database");
 const {MongoClientOptions} = require("mongodb");
 
@@ -21,7 +24,7 @@ const dateFormatString = "dddd, MMMM Do, YYYY [at] hh:mm:ss A"
  * @param {Object} bot the discord.js bot instance we are using to communicate with discord
  */
 class Scheduler {
-    constructor() {
+    constructor(bot) {
 
 
         /**
@@ -66,7 +69,13 @@ class Scheduler {
 
             const reminderTime = moment(reminder.date);
 
-            await agenda.schedule(reminder.date, reminderJobName, {userId: userId, reminder: reminder.message});
+            console.log({channelName: channel.name, channelId: channel.id})
+            await agenda.schedule(reminder.date, reminderJobName, {
+                userId: userId,
+                reminder: reminder.message,
+                channelName: channel.name,
+                channelId: channel.id
+            });
 
             await channel.send(`OK **<@${userId}>**, on **${reminderTime.format(dateFormatString)}** I will remind you **${reminder.message}**`);
 
@@ -308,24 +317,45 @@ class Scheduler {
         /**
          * Use this function to send a reminder to a user
          *
-         * @param userId the id of the user to send a reminder to
-         * @param {String} message the reminder message to send to a user
+         * @param {String} userId the id of the user to send a reminder to
+         * @param {String} reminder the reminder message to send to a user
+         * @param {String} channelName name of the channel the reminder was created in
+         * @param {String} channelId id of the channel the reminder was created in
          */
-        const sendReminder = async function (userId, message) {
+        const sendReminder = async function ({userId, reminder, channelName, channelId}) {
 
-            const user = await bot.fetchUser(userId);
+            // const user = await bot.fetchUser(userId);
+            const user = await bot.users.fetch(userId)
+            const cached = await bot.channels.cache
+            const channel = await cached.get(channelId)
+            const generalChannel = await cached.get("general")
+
             if (user === undefined) {
                 console.log("user not found: " + userId)
                 return;
             }
 
-            const channel = await user.createDM();
+
+            const channelMessage = `Hey **<#${channelName}>**, **<@${userId}>** wanted to remind you: **${reminder}**`
+            const generalMessage = `There was an error locating the channel for this message. "Hey **<#${channelName}>**,
+             **<@${userId}>** wanted to remind you: **${reminder}**"`
+
+
             if (channel === undefined) {
+                console.log("channel not found: " + userId)
+                await generalChannel.send(generalMessage)
+                return;
+            }
+
+            const userDM = await user.createDM();
+
+            if (userDM === undefined) {
                 console.log("dm channel not found for user " + userId)
                 return;
             }
 
-            await channel.send(`Hey **<@${userId}>**, remember **${message}**`);
+            await channel.send(channelMessage)
+            await userDM.send(`Hey **<@${userId}>**, remember **${reminderx}**`);
             console.log("reminder sent to user " + userId);
         }
 
@@ -334,23 +364,20 @@ class Scheduler {
         const agendaConfig = {
             db: {
                 address: process.env.mongourl,
-                // options: {useNewUrlParser: true, useUnifiedTopology: true}
             }
         }
         const agenda = new Agenda.Agenda(agendaConfig).processEvery('one minute')
 
 //make sure we only try to use agenda when it's ready
-//     agenda.on(() => {
         agenda.start().then(() => {
             //define our only job, the 'send reminder' job.
             agenda.define('send reminder', async (job, done) => {
                 const data = job.attrs.data;
-                await sendReminder(data.userId, data.reminder);
+                await sendReminder(data);
                 //this is an async func, call done to mark it as complete.
                 done();
             });
-            //start the scheduler.
-            // await agenda.start();
+
         }).catch(e => {
             console.warn({"agenda is not ready": e})
         })

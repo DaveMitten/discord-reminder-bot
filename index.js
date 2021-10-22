@@ -1,25 +1,25 @@
- // Written by Edwin Jones - http://edwinjones.me.uk
+// Written by Edwin Jones - http://edwinjones.me.uk
 
 'use strict';
 
- // dependencies
- const Scheduler = require('./scheduler.js')
+// dependencies
+const Scheduler = require('./scheduler.js')
 const Discord = require('discord.js');
 const Client = Discord.Client
 const Intents = Discord.Intents
+const MessageEmbed = Discord.MessageEmbed
 require("dotenv").config()
-const clientOptions = { intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] }
+const clientOptions = {intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES]}
 //Initialize Discord client
 const client = new Client();
 
 //Initialize scheduler
 let scheduler = new Scheduler(client);
-// const auth = require('./auth.json'); //you need to make this file yourself!
 
 const helpmsg =
     "Hi there, I'm reminder client!\n" +
     "You can see this message again by typing **!help**\n" +
-    "You can set a reminder for yourself by typing **!remindme [about a thing] [at a time in the future]**\n" +
+    "You can set a reminder for yourself by typing THERE ARE SPACES BETWEEN **!remindme SPACE [about a thing] SPACE [at a time in the future: FORMAT 00:00:00 or 00:00]**\n" +
     "You can snooze the most recent reminder you received by typing **!snooze [for a time / until a time in the future]**\n" +
     "You can snooze all the reminders you have received by typing **!snoozeall [for a time / until a time in the future]**\n" +
     "You can remove the most recent reminder you received by typing **!clear**\n" +
@@ -38,20 +38,14 @@ async function onError(channel, err) {
     await channel.send("Looks like even I forget things, like how to do what you just asked. Please ask me again later.");
 }
 
-
-
 //start the client by making it log in to discord.
-client.login(process.env.token).then(i => {
-    console.log({"loggedIn": true, "scheduler": scheduler})
-}).catch(e => {
-    console.warn({"login": e})
-});
+client.login(process.env.token).then(i => console.log({i})).catch(e => console.warn(`cant log in:${e}`))
 
- client.on('message', msg => {
-     if (msg.content === 'ping') {
-         msg.reply('pong');
-     }
- });
+client.on('message', async msg => {
+    if (msg.content === 'ping') {
+        await msg.reply('pong');
+    }
+});
 
 client.on('ready', async (evt) => {
     try {
@@ -64,13 +58,6 @@ client.on('ready', async (evt) => {
     console.log(`${client.user.username} - (${client.user.id})`);
 });
 
-
-// client.on('message', async message => {
-//     if (message.content === 'ping') {
-//         await message.channel.send('pong');
-//     }
-// });
-//log when the client is ready
 
 const prefix = "!"
 
@@ -103,12 +90,23 @@ client.on('message', async (message) => {
                     case 'remindme':
                         try {
                             await scheduler.setReminder(message?.author.id, message?.channel, parameters);
-
                         } catch (e) {
                             console.warn({error: e + `  || schedule error ${command}`})
                         }
                         break;
+                    case 'potluck':
+                        const vid = new MessageEmbed({
+                            color: 0x0099ff,
+                            title: 'Click itttttttttt',
+                            url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                            description: 'Click me, do it!',
+                        })
+                        console.log(vid)
 
+                        await message?.channel.send(vid);
+
+
+                        break;
                     case 'snooze':
                         try {
                             await scheduler.snoozeReminder(message?.author.id, message?.channel, parameters);
@@ -137,7 +135,7 @@ client.on('message', async (message) => {
                         break;
 
                     case 'clear':
-                            await scheduler.clearActiveReminder(message?.author.id, message?.channel);
+                        await scheduler.clearActiveReminder(message?.author.id, message?.channel);
                         break;
 
                     case 'clearall':

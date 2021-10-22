@@ -3,7 +3,6 @@
 'use strict';
 
 //dependencies
-const log = require('debug')('reminder-bot');
 const {Client} = require('discord.js');
 const Scheduler = require('./scheduler');
 require('dotenv').config(); //initialize dotenv
@@ -50,9 +49,9 @@ bot.on('ready', async (evt) => {
         console.warn({"error from connected ": e})
 
     }
-    log('connected');
-    log('logged in as: ');
-    log(`${bot.user.username} - (${bot.user.id})`);
+    console.log('connected');
+    console.log('logged in as: ');
+    console.log(`${bot.user.username} - (${bot.user.id})`);
 });
 const prefix = "!"
 
@@ -66,7 +65,7 @@ bot.on('messageCreate', async (message) => {
         // It will listen for messages that will start with `!`
         if (!message.content.startsWith(prefix)) {
 
-            log('Received a command!')
+            console.log('Received a command!')
 
             let messageContent = message.content.substring(1);
             let command = messageContent.split(' ')[0];
@@ -77,7 +76,7 @@ bot.on('messageCreate', async (message) => {
                 // handle commands
                 case 'help':
                     await message.channel.send(helpmsg);
-                    log("help command executed");
+                    console.log("help command executed");
                     break;
 
                 case 'remindme':
@@ -116,6 +115,7 @@ bot.on('messageCreate', async (message) => {
 
 //start the bot by making it log in to discord.
 bot.login(process.env.token).then(i => {
+    console.log({"loggedIn": true})
 }).catch(e => {
     console.warn({"login": e})
 });

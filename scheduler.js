@@ -6,7 +6,6 @@ const moment = require("moment")
 const StringBuilder = require("string-builder")
 const parser = require("./parser");
 
-const log = require('debug')('scheduler');
 // const auth = require('./auth.json'); //you need to make this file yourself!
 
 const genericParserErrorMessage = "Sorry, I didn't understand that."
@@ -100,7 +99,7 @@ async function Scheduler(bot) {
         await agenda.jobs({_id: jobId}, async (err, jobs) => {
 
             if (err) {
-                log(`reminder snooze failed due to error: ${err}`);
+               console.log (`reminder snooze failed due to error: ${err}`);
                 return;
             }
 
@@ -112,7 +111,7 @@ async function Scheduler(bot) {
 
             await channel.send(`OK **<@${userId}>**, on **${reminderTime.format(dateFormatString)}** I will remind you **${job.attrs.data.reminder}**`);
 
-            log(`reminder snoozed for user ${userId}`);
+           console.log (`reminder snoozed for user ${userId}`);
         });
     }
 
@@ -152,7 +151,7 @@ async function Scheduler(bot) {
                 await channel.send(`OK **<@${userId}>**, I have snoozed ${jobs.length} active reminders for you`);
             }
 
-            log(`snoozeall reminders request processed for user ${userId}`);
+           console.log (`snoozeall reminders request processed for user ${userId}`);
         });
     }
 
@@ -167,7 +166,7 @@ async function Scheduler(bot) {
         await agenda.jobs({name: reminderJobName, 'data.userId': userId, nextRunAt: {$ne: null}}, async (err, jobs) => {
 
             if (err) {
-                log(`list reminders failed due to error: ${err}`);
+               console.log (`list reminders failed due to error: ${err}`);
                 await channel.send(genericSchedulerErrorMessage);
                 return;
             } else if (jobs.length === 0) {
@@ -197,7 +196,7 @@ async function Scheduler(bot) {
                 await channel.send(sb.toString());
             }
 
-            log(`list reminders request processed for user ${userId}`);
+           console.log (`list reminders request processed for user ${userId}`);
         });
     }
 
@@ -221,7 +220,7 @@ async function Scheduler(bot) {
             if (err) {
 
                 await channel.send(genericSchedulerErrorMessage);
-                log(`reminder removal failed due to error: ${err}`);
+               console.log (`reminder removal failed due to error: ${err}`);
                 return;
             }
 
@@ -234,10 +233,10 @@ async function Scheduler(bot) {
 
                     await channel.send(`OK **<@${userId}>**, I have removed your most recent reminder: **${job.attrs.data.reminder}**`);
 
-                    log(`reminder removed for user ${userId}`);
+                   console.log (`reminder removed for user ${userId}`);
                 } else {
 
-                    log(`reminder removal failed due to error: ${err}`);
+                   console.log (`reminder removal failed due to error: ${err}`);
                     await channel.send(genericSchedulerErrorMessage);
                 }
             });
@@ -255,14 +254,15 @@ async function Scheduler(bot) {
         await agenda.cancel({name: reminderJobName, 'data.userId': userId}).then(async (err, numRemoved) => {
 
             if (err) {
-                log(`delete all reminders request failed for user ${userId} because: ${err}`);
+               console.log (`delete all reminders request failed for user ${userId} because: ${err}`);
                 await channel.send(`I couldn't remove your reminders **<@${userId}>**, please try again later.`)
             } else {
-                log(`delete all reminders request processed for user ${userId}`);
+               console.log (`delete all reminders request processed for user ${userId}`);
                 await channel.send(`I have removed all ${numRemoved} of your reminders **<@${userId}>**`)
             }
         }).catch(e => {
-            console.warn({"error, schedulaer, clear all reminders":e})
+            console.warn({"error, schedulaer, clear all reminders": e})
+            warn({"error, schedulaer, clear all reminders": e})
         })
     }
 
@@ -281,7 +281,7 @@ async function Scheduler(bot) {
         }, async (err, numRemoved) => {
 
             if (err) {
-                log(`delete active reminders request failed for user ${userId} because: ${err}`);
+               console.log (`delete active reminders request failed for user ${userId} because: ${err}`);
                 await channel.send(`I couldn't remove your reminders **<@${userId}>**, please try again later.`)
                 return;
             } else if (numRemoved === 0) {
@@ -289,7 +289,7 @@ async function Scheduler(bot) {
             } else {
                 await channel.send(`I have removed all ${numRemoved} of your active reminders **<@${userId}>**`)
             }
-            log(`delete active reminders request processed for user ${userId}`);
+           console.log (`delete active reminders request processed for user ${userId}`);
         });
     }
 
@@ -305,7 +305,7 @@ async function Scheduler(bot) {
 
         if (user === undefined) {
 
-            log("user not found: " + userId)
+           console.log ("user not found: " + userId)
             return;
         }
 
@@ -313,13 +313,13 @@ async function Scheduler(bot) {
 
         if (channel === undefined) {
 
-            log("dm channel not found for user " + userId)
+           console.log ("dm channel not found for user " + userId)
             return;
         }
 
         await channel.send(`Hey **<@${userId}>**, remember **${message}**`);
 
-        log("reminder sent to user " + userId);
+       console.log ("reminder sent to user " + userId);
     }
 
     //create agenda instance.

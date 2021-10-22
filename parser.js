@@ -2,7 +2,6 @@
 
 'use strict';
 
-const log = require('debug')('parser');
 const chrono = require('chrono-node');
 const moment = require('moment');
 

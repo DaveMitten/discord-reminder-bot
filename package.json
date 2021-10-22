@@ -10,14 +10,16 @@
   "author": "Edwin Jones",
   "license": "MIT",
   "dependencies": {
-    "agenda": "^1.0.3",
+    "agenda": "^4.2.1",
     "chrono-node": "^2.2.4",
     "debug": "^3.1.0",
     "discord.js": "^11.3.2",
-    "moment": "^2.22.2",
+    "moment": "^2.29.1",
     "string-builder": "^0.1.4"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "dotenv": "^10.0.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/edwin-jones/discord-reminder-bot.git"

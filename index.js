@@ -4,24 +4,19 @@
 
 //dependencies
 const log = require('debug')('reminder-bot');
-const { Client, Intents } = require('discord.js');
+const {Client} = require('discord.js');
 const Scheduler = require('./scheduler');
-
+require('dotenv').config(); //initialize dotenv
 
 
 // const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
-client.on("messageCreate", (message) => {
-    if (message.author.bot) return false;
-
-    console.log(`Message from ${message.author.username}: ${message.content}`);
-});
 
 //Initialize Discord Bot
 let bot = new Client();
 
 //Initialize scheduler
-let scheduler = new Scheduler(bot);
+let scheduler = Scheduler(bot);
 // const auth = require('./auth.json'); //you need to make this file yourself!
 
 const helpmsg =
@@ -48,9 +43,13 @@ async function onError(channel, err) {
 
 
 //log when the bot is ready
-bot.on('ready', async(evt) => {
-    await evt.channel.send("connected");
+bot.on('ready', async (evt) => {
+    try {
+        await evt.channel.send("connected");
+    } catch (e) {
+        console.warn({"error from connected ": e})
 
+    }
     log('connected');
     log('logged in as: ');
     log(`${bot.user.username} - (${bot.user.id})`);
@@ -116,4 +115,7 @@ bot.on('messageCreate', async (message) => {
 });
 
 //start the bot by making it log in to discord.
-await bot.login(process.env.token);
+bot.login(process.env.token).then(i => {
+}).catch(e => {
+    console.warn({"login": e})
+});

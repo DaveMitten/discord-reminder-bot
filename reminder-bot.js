@@ -53,9 +53,9 @@ bot.on('message', async (message) => {
 
         // the bot needs to know if it will execute a command
         // It will listen for messages that will start with `!`
-        if (message.content.substring(0, 1) == '!') {
+        if (message.content.substring(0, 1) === '!') {
 
-            log('recieved a command!')
+            log('Received a command!')
 
             let messageContent = message.content.substring(1);
             let command = messageContent.split(' ')[0];
@@ -101,9 +101,9 @@ bot.on('message', async (message) => {
     }
     catch (err) {
 
-        onError(message.channel, err);
+        await onError(message.channel, err);
     }
 });
 
 //start the bot by making it log in to discord.
-bot.login(auth.token);
+await bot.login(auth.token);

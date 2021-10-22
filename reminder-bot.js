@@ -4,11 +4,21 @@
 
 //dependencies
 const log = require('debug')('reminder-bot');
-const discord = require('discord.js');
+const { Client, Intents } = require('discord.js');
 const Scheduler = require('./scheduler');
 
+
+
+// const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+
+client.on("messageCreate", (message) => {
+    if (message.author.bot) return false;
+
+    console.log(`Message from ${message.author.username}: ${message.content}`);
+});
+
 //Initialize Discord Bot
-let bot = new discord.Client();
+let bot = new Client();
 
 //Initialize scheduler
 let scheduler = new Scheduler(bot);
@@ -38,21 +48,24 @@ async function onError(channel, err) {
 
 
 //log when the bot is ready
-bot.on('ready', (evt) => {
+bot.on('ready', async(evt) => {
+    await evt.channel.send("connected");
 
     log('connected');
     log('logged in as: ');
     log(`${bot.user.username} - (${bot.user.id})`);
 });
+const prefix = "!"
 
 // Decide what to do when the bot get a message. NOTE: discord supports markdown syntax.
-bot.on('message', async (message) => {
+
+bot.on('messageCreate', async (message) => {
 
     try {
 
         // the bot needs to know if it will execute a command
         // It will listen for messages that will start with `!`
-        if (message.content.substring(0, 1) === '!') {
+        if (!message.content.startsWith(prefix)) {
 
             log('Received a command!')
 

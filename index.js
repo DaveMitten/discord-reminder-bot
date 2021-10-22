@@ -13,7 +13,7 @@ const clientOptions = { intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESS
 const client = new Client();
 
 //Initialize scheduler
-let scheduler = Scheduler(client);
+let scheduler = new Scheduler(client);
 // const auth = require('./auth.json'); //you need to make this file yourself!
 
 const helpmsg =
@@ -77,7 +77,6 @@ const prefix = "!"
 // Decide what to do when the client get a message. NOTE: discord supports markdown syntax.
 
 client.on('message', async (message) => {
-    console.log(message.content)
     if (message) {
         try {
             // the client needs to know if it will execute a command
@@ -98,17 +97,15 @@ client.on('message', async (message) => {
                             await message?.channel.send(helpmsg);
                             console.log("help command executed");
                         } catch (e) {
-                            console.warn({error: e + `  scheduale error ${command}`})
+                            console.warn({error: e + `  schedule error ${command}`})
                         }
-
                         break;
-
                     case 'remindme':
                         try {
                             await scheduler.setReminder(message?.author.id, message?.channel, parameters);
 
                         } catch (e) {
-                            console.warn({error: e + `  scheduale error ${command}`})
+                            console.warn({error: e + `  || schedule error ${command}`})
                         }
                         break;
 
@@ -117,7 +114,7 @@ client.on('message', async (message) => {
                             await scheduler.snoozeReminder(message?.author.id, message?.channel, parameters);
 
                         } catch (e) {
-                            console.warn({error: e + `  scheduale error ${command}`})
+                            console.warn({error: e + `  schedule error ${command}`})
                         }
                         break;
 
@@ -126,7 +123,7 @@ client.on('message', async (message) => {
                             await scheduler.snoozeReminders(message?.author.id, message?.channel, parameters);
 
                         } catch (e) {
-                            console.warn({error: e + `  scheduale error ${command}`})
+                            console.warn({error: e + `  schedule error ${command}`})
                         }
                         break;
 
@@ -135,7 +132,7 @@ client.on('message', async (message) => {
                             await scheduler.listReminders(message?.author.id, message?.channel);
 
                         } catch (e) {
-                            console.warn({error: e + `  scheduale error ${command}`})
+                            console.warn({error: e + `  schedule error ${command}`})
                         }
                         break;
 
@@ -148,7 +145,7 @@ client.on('message', async (message) => {
                             await scheduler.clearActiveReminders(message?.author.id, message?.channel);
 
                         } catch (e) {
-                            console.warn({error: e + `  scheduale error ${command}`})
+                            console.warn({error: e + `  schedule error ${command}`})
                         }
                         break;
 
@@ -157,7 +154,7 @@ client.on('message', async (message) => {
                             await scheduler.clearAllReminders(message?.author.id, message?.channel);
 
                         } catch (e) {
-                            console.warn({error: e + `  scheduale error ${command}`})
+                            console.warn({error: e + `  schedule error ${command}`})
                         }
                         break;
                 }

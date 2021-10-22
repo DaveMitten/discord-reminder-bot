@@ -109,9 +109,7 @@ module.exports.getDateFromSnoozeString = (snoozeString) => {
     if (!this.validSnoozeString(snoozeString)) {
         throw new Error("Invalid snooze string!");
     }
-
     let parsedDate = chrono.parse(cleanSnoozeString(snoozeString), new Date(), {forwardDate: true})[0];
-
     return parsedDate.start.date();
 
 }

@@ -314,7 +314,7 @@ function Scheduler(bot) {
 
         const channel = await user.createDM();
 
-        if (channel == undefined) {
+        if (channel === undefined) {
 
             log("dm channel not found for user " + userId)
             return;

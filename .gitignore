@@ -1,5 +1,4 @@
-
+#env
 .env
+#misc
 node_modules
-.auth.json
-.vscode/launch.json
